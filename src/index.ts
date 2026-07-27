@@ -45,6 +45,10 @@ async function upload(req: Request, token?: string): Promise<Response> {
     tokens.delete(token);
   }
 
+  const contentType = req.headers.get("content-type") || "";
+  if (!contentType.includes("multipart/form-data"))
+    return json({ error: "Expected multipart/form-data" }, 415);
+
   const form = await req.formData();
   const file = form.get("file");
   if (!file || !(file instanceof File))
