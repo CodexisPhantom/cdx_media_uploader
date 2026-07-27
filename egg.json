@@ -1,0 +1,76 @@
+{
+  "name": "CDX Media Uploader",
+  "description": "General-purpose file upload and media hosting API — serves images, audio, and video via HTTP with presigned URLs, auth tokens, and size limits. Built for FiveM (lb-phone, qb-phone, HUDs, inventories) but works with any project that needs a lightweight self-hosted file endpoint.",
+  "author": "Codexis",
+  "image": "ghcr.io/ptero-installers:debian",
+  "startup": "bun run dist/index.js",
+  "config": {
+    "files": {
+      "env": {
+        "location": ".env",
+        "parseAs": "both"
+      }
+    },
+    "startup": {
+      "done": "running on",
+      "userInteraction": []
+    },
+    "logs": {
+      "type": "ungamed"
+    },
+    "stop": "SIGINT"
+  },
+  "scripts": [
+    {
+      "name": "Install",
+      "command": "apt-get update && apt-get install -y curl && curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && if [ -f package.json ]; then bun install --production && bun run build; fi"
+    }
+  ],
+  "variables": [
+    {
+      "name": "Port",
+      "description": "Port the server listens on",
+      "env_variable": "PORT",
+      "default_value": "3000",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1024,65535"
+    },
+    {
+      "name": "Base URL",
+      "description": "Public URL for file access (e.g. http://your-ip:3000). Must be reachable by game clients.",
+      "env_variable": "BASE_URL",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required"
+    },
+    {
+      "name": "API Key",
+      "description": "Shared secret for lb-phone auth (set same value in lb-phone/server/apiKeys.lua)",
+      "env_variable": "API_KEY",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required"
+    },
+    {
+      "name": "Upload Dir",
+      "description": "Directory to store uploaded files",
+      "env_variable": "UPLOAD_DIR",
+      "default_value": "./uploads",
+      "user_viewable": true,
+      "user_editable": false,
+      "rules": "string"
+    },
+    {
+      "name": "Max Size (MB)",
+      "description": "Maximum upload file size in megabytes",
+      "env_variable": "MAX_SIZE_MB",
+      "default_value": "100",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|integer|between:1,512"
+    }
+  ]
+}

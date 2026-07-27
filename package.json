@@ -1,0 +1,17 @@
+{
+  "name": "cdx_media_uploader",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun --env-file=.env --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist",
+    "start": "bun --env-file=.env dist/index.js"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^6"
+  }
+}
