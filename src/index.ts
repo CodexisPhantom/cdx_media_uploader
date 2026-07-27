@@ -1,5 +1,5 @@
-import { mkdirSync, existsSync, unlinkSync } from "node:fs";
-import { join } from "node:path";
+import { mkdirSync, existsSync, unlinkSync } from "fs";
+import { join } from "path";
 
 const PORT = Number(Bun.env.PORT) || 3000;
 const UPLOAD_DIR = Bun.env.UPLOAD_DIR || "./uploads";
