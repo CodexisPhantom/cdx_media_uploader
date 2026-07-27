@@ -1,31 +1,21 @@
 {
+  "meta": {
+    "version": "PTDL_v1"
+  },
   "name": "CDX Media Uploader",
   "description": "General-purpose file upload and media hosting API — serves images, audio, and video via HTTP with presigned URLs, auth tokens, and size limits. Built for FiveM (lb-phone, qb-phone, HUDs, inventories) but works with any project that needs a lightweight self-hosted file endpoint.",
   "author": "Codexis",
   "image": "ghcr.io/ptero-installers:debian",
   "startup": "bun run dist/index.js",
   "config": {
-    "files": {
-      "env": {
-        "location": ".env",
-        "parseAs": "both"
-      }
-    },
-    "startup": {
-      "done": "running on",
-      "userInteraction": []
-    },
-    "logs": {
-      "type": "ungamed"
-    },
+    "files": "{\".env\":{\"location\":\".env\",\"parseAs\":\"both\"}}",
+    "startup": "{\"done\":\"running on\",\"userInteraction\":[]}",
+    "logs": "{\"type\":\"ungamed\"}",
     "stop": "SIGINT"
   },
-  "scripts": [
-    {
-      "name": "Install",
-      "command": "apt-get update && apt-get install -y curl && curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && if [ -f package.json ]; then bun install --production && bun run build; fi"
-    }
-  ],
+  "scripts": {
+    "installation": "apt-get update && apt-get install -y curl && curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && if [ -f package.json ]; then bun install --production && bun run build; fi"
+  },
   "variables": [
     {
       "name": "Port",
@@ -47,7 +37,7 @@
     },
     {
       "name": "API Key",
-      "description": "Shared secret for lb-phone auth (set same value in lb-phone/server/apiKeys.lua)",
+      "description": "Shared secret for auth (set same value in your client config)",
       "env_variable": "API_KEY",
       "default_value": "",
       "user_viewable": true,
