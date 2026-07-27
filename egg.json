@@ -1,30 +1,96 @@
 {
   "meta": {
-    "version": "PTDL_v1"
+    "version": "PTDL_v2",
+    "update_url": null
   },
   "name": "CDX Media Uploader",
-  "description": "General-purpose file upload and media hosting API — serves images, audio, and video via HTTP with presigned URLs, auth tokens, and size limits. Built for FiveM (lb-phone, qb-phone, HUDs, inventories) but works with any project that needs a lightweight self-hosted file endpoint.",
   "author": "Codexis",
-  "image": "ghcr.io/ptero-installers:debian",
+  "description": "General-purpose file upload and media hosting API — serves images, audio, and video via HTTP with presigned URLs, auth tokens, and size limits. Built for FiveM (lb-phone, qb-phone, HUDs, inventories) but works with any project that needs a lightweight self-hosted file endpoint.",
+  "features": null,
+  "docker_images": {
+    "Bun Latest": "ghcr.io/parkervcp/yolks:bun_latest"
+  },
+  "file_denylist": [],
   "startup": "bun run dist/index.js",
   "config": {
-    "files": "{\".env\":{\"location\":\".env\",\"parseAs\":\"both\"}}",
-    "startup": "{\"done\":\"running on\",\"userInteraction\":[]}",
-    "logs": "{\"type\":\"ungamed\"}",
-    "stop": "SIGINT"
+    "files": "{}",
+    "startup": "{\n    \"done\": [\n        \"running on\"\n    ]\n}",
+    "logs": "{}",
+    "stop": "^^C"
   },
   "scripts": {
-    "installation": "apt-get update && apt-get install -y curl && curl -fsSL https://bun.sh/install | bash && export BUN_INSTALL=\"$HOME/.bun\" && export PATH=\"$BUN_INSTALL/bin:$PATH\" && if [ -f package.json ]; then bun install --production && bun run build; fi"
+    "installation": {
+      "script": "#!/bin/bash\n# CDX Media Uploader Installation Script\n#\n# Server Files: /mnt/server\napt update\napt install -y git curl jq file unzip make gcc g++ python python-dev libtool\nmkdir -p /mnt/server\ncd /mnt/server\n\n## add git ending if it's not on the address\nif [[ ${GIT_ADDRESS} != *.git ]]; then\n    GIT_ADDRESS=${GIT_ADDRESS}.git\nfi\n\nif [ -z \"${USERNAME}\" ] && [ -z \"${ACCESS_TOKEN}\" ]; then\n    echo -e \"using anon api call\"\nelse\n    GIT_ADDRESS=\"https://${USERNAME}:${ACCESS_TOKEN}@$(echo -e ${GIT_ADDRESS} | cut -d/ -f3-)\"\nfi\n\n## pull git repo\nif [ \"$(ls -A /mnt/server)\" ]; then\n    echo -e \"/mnt/server directory is not empty.\"\n    if [ -d .git ]; then\n        echo -e \".git directory exists\"\n        if [ -f .git/config ]; then\n            echo -e \"loading info from git config\"\n            ORIGIN=$(git config --get remote.origin.url)\n        else\n            echo -e \"files found with no git config\"\n            echo -e \"closing out without touching things to not break anything\"\n            exit 10\n        fi\n    fi\n\n    if [ \"${ORIGIN}\" == \"${GIT_ADDRESS}\" ]; then\n        echo \"pulling latest from github\"\n        git pull\n    fi\nelse\n    echo -e \"/mnt/server is empty.\\ncloning files into repo\"\n    if [ -z ${BRANCH} ]; then\n        echo -e \"cloning default branch\"\n        git clone ${GIT_ADDRESS} .\n    else\n        echo -e \"cloning ${BRANCH}'\"\n        git clone --single-branch --branch ${BRANCH} ${GIT_ADDRESS} .\n    fi\nfi\n\n## install bun\ncurl -fsSL https://bun.sh/install | bash\nexport BUN_INSTALL=\"$HOME/.bun\"\nexport PATH=\"$BUN_INSTALL/bin:$PATH\"\n\necho \"Installing bun packages\"\nif [[ ! -z ${BUN_PACKAGES} ]]; then\n    bun install ${BUN_PACKAGES}\nfi\n\nif [ -f /mnt/server/package.json ]; then\n    bun install --production\n    bun run build\nfi\n\n## install end\necho \"-----------------------------------------\"\necho \"Installation completed...\"\necho \"-----------------------------------------\"",
+      "container": "ghcr.io/parkervcp/installers:debian",
+      "entrypoint": "bash"
+    }
   },
   "variables": [
     {
+      "name": "Git Repository Address",
+      "description": "The Git repository address to clone.",
+      "env_variable": "GIT_ADDRESS",
+      "default_value": "https://github.com/CodexisPhantom/cdx_media_uploader.git",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
+      "name": "Git Branch",
+      "description": "The Git branch to install.",
+      "env_variable": "BRANCH",
+      "default_value": "main",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
+      "name": "Git Username",
+      "description": "Git username for authentication.",
+      "env_variable": "USERNAME",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
+      "name": "Git Access Token",
+      "description": "Git access token for authentication.",
+      "env_variable": "ACCESS_TOKEN",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
+      "name": "Additional Bun Packages",
+      "description": "Install additional bun packages.\nUse spaces to separate.",
+      "env_variable": "BUN_PACKAGES",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string",
+      "sort": null,
+      "field_type": "text"
+    },
+    {
       "name": "Port",
-      "description": "Port the server listens on",
+      "description": "Port the server listens on.",
       "env_variable": "PORT",
       "default_value": "3000",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|integer|between:1024,65535"
+      "rules": "required|integer|between:1024,65535",
+      "sort": null,
+      "field_type": "text"
     },
     {
       "name": "Base URL",
@@ -33,34 +99,42 @@
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required"
+      "rules": "required",
+      "sort": null,
+      "field_type": "text"
     },
     {
       "name": "API Key",
-      "description": "Shared secret for auth (set same value in your client config)",
+      "description": "Shared secret for auth (set same value in your client config).",
       "env_variable": "API_KEY",
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required"
+      "rules": "required",
+      "sort": null,
+      "field_type": "text"
     },
     {
       "name": "Upload Dir",
-      "description": "Directory to store uploaded files",
+      "description": "Directory to store uploaded files.",
       "env_variable": "UPLOAD_DIR",
       "default_value": "./uploads",
       "user_viewable": true,
       "user_editable": false,
-      "rules": "string"
+      "rules": "string",
+      "sort": null,
+      "field_type": "text"
     },
     {
       "name": "Max Size (MB)",
-      "description": "Maximum upload file size in megabytes",
+      "description": "Maximum upload file size in megabytes.",
       "env_variable": "MAX_SIZE_MB",
       "default_value": "100",
       "user_viewable": true,
       "user_editable": true,
-      "rules": "required|integer|between:1,512"
+      "rules": "required|integer|between:1,512",
+      "sort": null,
+      "field_type": "text"
     }
   ]
 }
